@@ -20,7 +20,7 @@ export default function Glsl(){
         return color*light;
     }
     `
-     
+    
     let one = `
     float surfaceDistance(vec3 p) {
         return sphere(p, 1.);
@@ -51,10 +51,29 @@ export default function Glsl(){
           return col;
     }
     `
-    glslToMinimalRenderer(can,glsl);
+    let two = `
+    // Define the signed distance function (SDF) of your object here
+    float surfaceDistance(vec3 p) {
+        p.xyz *= 1.0+0.16*fractalNoise(5.0*p+time);
+	    return sphere(p, 0.3);
+    }
+
+    // Here you can define how your object at point p will be colored.
+    vec3 shade(vec3 p, vec3 normal) {
+        vec3 lightDirection = vec3(0.0, 1.0, 0.0);
+        float light = simpleLighting(p, normal, lightDirection);
+        light *= smoothstep(0.12,0.35,length(p));
+        vec3 color = vec3(1.0, 1.0, 1.0);
+	    return color*light;
+    }
+    `
+
+    glslToMinimalRenderer(can,two);
 
     useEffect(()=>{
+        att.current.innerHTML ="";
         att.current.appendChild(can);
+        
     },[])
 
     return(
